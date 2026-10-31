@@ -8,6 +8,7 @@ import {
   ArrowLeft, MapPin, Users, DollarSign, ShieldCheck, 
   Mail, CheckCircle2, Edit3, Trash2, Loader2 
 } from "lucide-react";
+import EditStudioDialog from "@/components/EditStudioDialog";
 
 interface ImageObject {
   filename?: string;
@@ -127,12 +128,8 @@ const ExploreDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => 
           
           <div className="flex items-center gap-3">
             {/* Edit Button */}
-            <Link
-              href={`/explore/${id}/edit`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:text-blue-600 transition"
-            >
-              <Edit3 size={14} /> Edit
-            </Link>
+           
+            <EditStudioDialog exploreData={setExploreData as never} />
 
             {/* Delete Button */}
             <button

@@ -7,6 +7,7 @@ import {
   LayoutGrid, MapPin, PlusCircle, ShieldCheck,
   SquarePlus, User, X, Blocks, FileText,
 } from "lucide-react";
+import Image from "next/image";
 
 const CATEGORIES = [
   "Photo Studio", "Sound Stage", "Podcast Room",
@@ -465,28 +466,27 @@ const AddStudio = () => {
               }}
             />
 
+
+
             {images.map((img) => (
-              <div
-                key={img.id}
-                className="relative mt-3 h-48 overflow-hidden rounded-lg border border-slate-200"
-              >
-                <img
+              <div key={img.id} className="relative mt-2 h-36 w-full overflow-hidden rounded-lg border border-slate-200">
+                <Image
                   src={img.url}
                   alt="Studio preview"
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
                 />
 
                 <button
                   type="button"
                   onClick={() => removeImage(img.id)}
                   aria-label="Remove image"
-                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/80 text-white hover:bg-red-600"
+                  className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-slate-900/80 text-white hover:bg-red-600 transition"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             ))}
-
             <p className="mt-2 text-right text-xs text-slate-500">
               {images.length}/1 image
             </p>
@@ -508,11 +508,10 @@ const AddStudio = () => {
               return (
                 <label
                   key={name}
-                  className={`flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm transition ${
-                    checked
+                  className={`flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm transition ${checked
                       ? "border-blue-300 bg-blue-50/50"
                       : "border-slate-200 bg-white hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   <input
                     type="checkbox"
