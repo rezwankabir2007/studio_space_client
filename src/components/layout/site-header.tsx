@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Aperture, Menu, Search, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button"; // variant ব্যবহারের জন্য
 import { cn } from "cn";
 
 const navLinks = [
@@ -56,19 +56,28 @@ export function SiteHeader() {
           >
             <Search className="size-4" aria-hidden />
           </Link>
-          <Button
-            render={<Link href="/login" />}
-            variant="outline"
-            className="h-9 border-white/30 bg-transparent px-4 text-white hover:bg-white/10 hover:text-white"
+
+          {/* Login Link using buttonVariants to avoid Base UI warning */}
+          <Link
+            href="/login"
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-9 border-white/30 bg-transparent px-4 text-white hover:bg-white/10 hover:text-white"
+            )}
           >
             Login
-          </Button>
-          <Button
-            render={<Link href="/register" />}
-            className="h-9 bg-brand px-4 hover:bg-brand-dark"
+          </Link>
+
+          {/* Register Link using buttonVariants */}
+          <Link
+            href="/register"
+            className={cn(
+              buttonVariants({ variant: "default" }),
+              "h-9 bg-brand px-4 hover:bg-brand-dark text-white"
+            )}
           >
             Register
-          </Button>
+          </Link>
         </div>
 
         <button
@@ -107,21 +116,26 @@ export function SiteHeader() {
             })}
           </ul>
           <div className="flex gap-3 px-3 pt-1">
-            <Button
-              render={<Link href="/login" />}
-              variant="outline"
-              className="h-9 flex-1 border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            <Link
+              href="/login"
               onClick={() => setOpen(false)}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-9 flex-1 border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              )}
             >
               Login
-            </Button>
-            <Button
-              render={<Link href="/register" />}
-              className="h-9 flex-1 bg-brand hover:bg-brand-dark"
+            </Link>
+            <Link
+              href="/register"
               onClick={() => setOpen(false)}
+              className={cn(
+                buttonVariants({ variant: "default" }),
+                "h-9 flex-1 bg-brand hover:bg-brand-dark text-white"
+              )}
             >
               Register
-            </Button>
+            </Link>
           </div>
         </nav>
       )}

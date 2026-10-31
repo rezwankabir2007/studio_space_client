@@ -34,14 +34,14 @@ export function AuthForm({ mode }: AuthFormProps) {
           <label htmlFor="name" className="text-sm font-medium text-foreground">
             Full name
           </label>
-          <Input id="name" name="name" type="text" required placeholder="Jane Creator" />
+          <Input id="name" name="name" type="text" required placeholder="Your Name" />
         </div>
       )}
       <div className="space-y-1.5">
         <label htmlFor="email" className="text-sm font-medium text-foreground">
           Email
         </label>
-        <Input id="email" name="email" type="email" required placeholder="you@example.com" />
+        <Input id="email" name="email" type="email" required placeholder="What is your email.." />
       </div>
       <div className="space-y-1.5">
         <label htmlFor="password" className="text-sm font-medium text-foreground">
