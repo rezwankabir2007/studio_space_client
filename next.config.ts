@@ -3,11 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      // লোকাল ব্যাকএন্ড থেকে ছবি লোড করার জন্য এটি যোগ করে দিন
+      { protocol: "https", hostname: "www.proaudiola.com" },
+      { protocol: "https", hostname: "static.wixstatic.com" },
+      { protocol: "https", hostname: "giggster.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "images.squarespace-cdn.com" },
+      { protocol: "https", hostname: "www.cbre.com" },
+      { protocol: "https", hostname: "news-images.dhan.co" },
+      { protocol: "https", hostname: "frce8xp4ye4n.compat.objectstorage.eu-frankfurt-1.oraclecloud.com" },
       {
         protocol: "http",
         hostname: "localhost",
