@@ -1,7 +1,13 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin, Users, DollarSign, ShieldCheck, Mail, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { 
+  ArrowLeft, MapPin, Users, DollarSign, ShieldCheck, 
+  Mail, CheckCircle2, Edit3, Trash2, Loader2 
+} from "lucide-react";
 
 interface ImageObject {
   filename?: string;
@@ -23,36 +29,93 @@ interface StudioDetail {
   images?: ImageObject[] | string[];
 }
 
-const ExploreDetailsPage = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id } = await params;
+const ExploreDetailsPage = ({ params }: { params: Promise<{ id: string }> }) => {
+  const router = useRouter();
+  const [id, setId] = useState<string | null>(null);
+  const [exploreData, setExploreData] = useState<StudioDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  let exploreData: StudioDetail | null = null;
-
-  try {
-    const res = await fetch(`http://localhost:8000/exploreStudios/${id}`, {
-      cache: "no-store",
+  useEffect(() => {
+    params.then((unwrappedParams) => {
+      setId(unwrappedParams.id);
     });
-    if (!res.ok) return notFound();
-    exploreData = await res.json();
-  } catch (error) {
-    console.error("Error fetching studio details:", error);
-    return notFound();
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchStudio = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/exploreStudios/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch studio");
+        const data = await res.json();
+        setExploreData(data);
+      } catch (error) {
+        console.error("Error fetching studio details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudio();
+  }, [id]);
+
+  // Delete Handler Function
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("Apni ki shothikbhabe ei studio-ti delete korte chan?");
+    if (!confirmDelete || !id) return;
+
+    try {
+      setIsDeleting(true);
+      const res = await fetch(`http://localhost:8000/exploreStudios/${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        alert("Studio successfully delete hoye geche!");
+        router.push("/explore");
+      } else {
+        alert(result.message || "Studio delete korte samasya hoyeche!");
+      }
+    } catch (error) {
+      console.error("Error deleting studio:", error);
+      alert("Server error! Studio delete kora jayni.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
   }
 
   if (!exploreData) {
-    return notFound();
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-slate-50 text-center">
+        <h2 className="text-lg font-bold text-slate-800">Studio Found Hoyni!</h2>
+        <Link href="/explore" className="mt-4 text-xs font-semibold text-blue-600 hover:underline">
+          Explore Page-e phire jan
+        </Link>
+      </div>
+    );
   }
 
-  // ছবি সেফলি বের করার জন্য হেল্পার লজিক
-  const mainImage =
-    (typeof exploreData.images?.[0] === "object"
+  const mainImage = (
+    typeof exploreData.images?.[0] === "object"
       ? (exploreData.images[0] as ImageObject)?.url
-      : (exploreData.images?.[0] as string)) ||
-    "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04";
+      : (exploreData.images?.[0] as string)
+  ) || "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04";
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 pb-16 font-sans">
-      {/* Top Header Navigation */}
+      {/* Top Navigation */}
       <div className="bg-white border-b sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link
@@ -61,22 +124,48 @@ const ExploreDetailsPage = async ({ params }: { params: Promise<{ id: string }> 
           >
             <ArrowLeft size={16} /> Back to Explore
           </Link>
-          <span className="text-xs font-medium rounded-full bg-blue-50 text-blue-600 px-3 py-1 border border-blue-100">
-            {exploreData.category}
-          </span>
+          
+          <div className="flex items-center gap-3">
+            {/* Edit Button */}
+            <Link
+              href={`/explore/${id}/edit`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 hover:text-blue-600 transition"
+            >
+              <Edit3 size={14} /> Edit
+            </Link>
+
+            {/* Delete Button */}
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 transition disabled:opacity-50"
+            >
+              {isDeleting ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Trash2 size={14} />
+              )}
+              Delete
+            </button>
+          </div>
         </div>
       </div>
 
       <main className="max-w-6xl mx-auto px-6 pt-8">
-        {/* Title & Location */}
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            {exploreData.title}
-          </h1>
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-500 font-medium">
-            <MapPin size={16} className="text-blue-600 shrink-0" />
-            <span>{exploreData.location}</span>
-          </p>
+        {/* Title & Category */}
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              {exploreData.title}
+            </h1>
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-500 font-medium">
+              <MapPin size={16} className="text-blue-600 shrink-0" />
+              <span>{exploreData.location}</span>
+            </p>
+          </div>
+          <span className="text-xs font-medium rounded-full bg-blue-50 text-blue-600 px-3 py-1 border border-blue-100 h-fit">
+            {exploreData.category}
+          </span>
         </div>
 
         {/* Banner Image */}
@@ -96,15 +185,14 @@ const ExploreDetailsPage = async ({ params }: { params: Promise<{ id: string }> 
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left Details Section */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Overview / Description */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-base font-bold text-slate-900 mb-3">About This Studio</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                {exploreData.description || "No description provided for this professional studio space."}
+                {exploreData.description || "No description provided for this studio space."}
               </p>
             </div>
 
-            {/* Key Features / Quick Info */}
+            {/* Quick Info */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
@@ -141,7 +229,7 @@ const ExploreDetailsPage = async ({ params }: { params: Promise<{ id: string }> 
               )}
             </div>
 
-            {/* Amenities List */}
+            {/* Amenities */}
             {exploreData.amenities && exploreData.amenities.length > 0 && (
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 className="text-base font-bold text-slate-900 mb-4">Amenities & Equipment</h2>
@@ -157,7 +245,7 @@ const ExploreDetailsPage = async ({ params }: { params: Promise<{ id: string }> 
             )}
           </div>
 
-          {/* Right Booking / Host Card */}
+          {/* Right Card */}
           <div>
             <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
               <div>
@@ -170,7 +258,6 @@ const ExploreDetailsPage = async ({ params }: { params: Promise<{ id: string }> 
 
               <hr className="border-slate-100" />
 
-              {/* Host Information */}
               {exploreData.hostName && (
                 <div className="space-y-3">
                   <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Hosted By</h3>
