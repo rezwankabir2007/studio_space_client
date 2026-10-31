@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button"; // buttonVariants ইমপোর্ট করা হলো
 import { heroSlides } from "@/lib/data";
 import { cn } from "cn";
 
@@ -64,20 +64,28 @@ export function HeroSlider() {
           <br className="hidden sm:block" /> your creative vision.
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
-          <Button
-            render={<Link href="/explore" />}
-            className="h-11 gap-2 bg-brand px-6 text-sm hover:bg-brand-dark"
+          {/* Explore Studios Link */}
+          <Link
+            href="/explore"
+            className={cn(
+              buttonVariants({ variant: "default" }),
+              "h-11 gap-2 bg-brand px-6 text-sm hover:bg-brand-dark text-white"
+            )}
           >
             Explore Studios
             <ArrowRight className="size-4" aria-hidden />
-          </Button>
-          <Button
-            render={<Link href="/host" />}
-            variant="outline"
-            className="h-11 border-white/40 bg-transparent px-6 text-sm text-white hover:bg-white/10 hover:text-white"
+          </Link>
+
+          {/* Host Your Space Link */}
+          <Link
+            href="/host"
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-11 border-white/40 bg-transparent px-6 text-sm text-white hover:bg-white/10 hover:text-white"
+            )}
           >
             Host Your Space
-          </Button>
+          </Link>
         </div>
       </div>
 

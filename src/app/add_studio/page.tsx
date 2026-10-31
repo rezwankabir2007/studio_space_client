@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft, ChevronDown, CloudUpload, Image as ImageIcon,
-  LayoutGrid, MapPin, Plus, PlusCircle, ShieldCheck,
+  LayoutGrid, MapPin, PlusCircle, ShieldCheck,
   SquarePlus, User, X, Blocks, FileText,
 } from "lucide-react";
 
@@ -19,7 +18,6 @@ const AMENITIES = [
   "WiFi", "Kitchen", "Parking", "Restroom",
 ];
 
-const MAX_IMAGES = 5;
 const MAX_DESC = 1000;
 
 type ImageItem = {
@@ -67,6 +65,16 @@ const SectionTitle = ({
   </div>
 );
 
+// ফাইলকে Base64 এ কনভার্ট করার হেল্পার ফাংশন
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 const AddStudio = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const urlsRef = useRef<string[]>([]);
@@ -86,20 +94,19 @@ const AddStudio = () => {
   const [amenities, setAmenities] = useState<string[]>(["WiFi"]);
   const [images, setImages] = useState<ImageItem[]>([]);
   const [loading, setLoading] = useState(false);
+
   const [message, setMessage] = useState({
     success: "",
     error: "",
   });
 
-  // Cleanup image URLs
   useEffect(() => {
     return () => {
-      urlsRef.current.forEach(URL.revokeObjectURL);
+      urlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       urlsRef.current = [];
     };
   }, []);
 
-  // Input change
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -111,7 +118,6 @@ const AddStudio = () => {
     }));
   };
 
-  // Amenities
   const toggleAmenity = (name: string) => {
     setAmenities((prev) =>
       prev.includes(name)
@@ -120,58 +126,73 @@ const AddStudio = () => {
     );
   };
 
-  // Image upload
   const addFiles = (files: FileList | File[] | null) => {
-    if (!files) return;
+    if (!files || !files.length) return;
 
-    const selected = Array.from(files);
-    const valid = selected.filter((file) =>
-      ["image/jpeg", "image/png", "image/webp"].includes(file.type)
-    );
-
-    const slots = MAX_IMAGES - images.length;
-
-    if (valid.length !== selected.length) {
-      setMessage({ success: "", error: "Only JPG, PNG and WEBP allowed." });
-    } else if (valid.length > slots) {
+    if (images.length >= 1) {
       setMessage({
         success: "",
-        error: `You can upload only ${slots} more image(s).`,
+        error: "Please remove the current image before adding another.",
       });
-    } else {
-      setMessage({ success: "", error: "" });
+      return;
     }
 
-    if (slots <= 0) return;
+    const selected = Array.from(files);
 
-    const newImages = valid.slice(0, slots).map((file) => {
-      const url = URL.createObjectURL(file);
-      urlsRef.current.push(url);
+    if (selected.length > 1) {
+      setMessage({
+        success: "",
+        error: "Only one image is allowed.",
+      });
+      return;
+    }
 
-      return {
-        id: `${file.name}-${file.lastModified}-${Math.random()}`,
+    const file = selected[0];
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setMessage({
+        success: "",
+        error: "Only JPG, PNG and WEBP images are allowed.",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({
+        success: "",
+        error: "Image size must be under 5MB.",
+      });
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    urlsRef.current.push(url);
+
+    setImages([
+      {
+        id: `${file.name}-${file.lastModified}-${Date.now()}`,
         file,
         url,
-      };
-    });
+      },
+    ]);
 
-    setImages((prev) => [...prev, ...newImages]);
+    setMessage({ success: "", error: "" });
   };
 
-  // Remove image
   const removeImage = (id: string) => {
     const image = images.find((item) => item.id === id);
     if (!image) return;
 
     URL.revokeObjectURL(image.url);
+
     urlsRef.current = urlsRef.current.filter(
       (url) => url !== image.url
     );
 
-    setImages((prev) => prev.filter((item) => item.id !== id));
+    setImages([]);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
-  // Reset form
   const resetForm = () => {
     setForm({
       title: "",
@@ -187,27 +208,27 @@ const AddStudio = () => {
 
     images.forEach((image) => {
       URL.revokeObjectURL(image.url);
-      urlsRef.current = urlsRef.current.filter(
-        (url) => url !== image.url
-      );
     });
 
+    urlsRef.current = [];
     setImages([]);
     setAmenities(["WiFi"]);
+
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  // Submit form
-
-
-  // Submit form
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     setMessage({ success: "", error: "" });
 
     if (!images.length) {
-      setMessage({ success: "", error: "Please upload at least one image." });
+      setMessage({
+        success: "",
+        error: "Please upload one studio image.",
+      });
       return;
     }
 
@@ -216,29 +237,37 @@ const AddStudio = () => {
     setLoading(true);
 
     try {
-      const payload = new FormData();
+      // ফাইলটি সরাসরি Base64 স্ট্রিং বানিয়ে নেওয়া
+      const base64String = await fileToBase64(images[0].file);
 
-      Object.entries(form).forEach(([key, value]) => {
-        payload.append(key, value);
-      });
-
-      amenities.forEach((item) => payload.append("amenities", item));
-      images.forEach((image) => payload.append("images", image.file));
+      // JSON বডি পেলোড
+      const bodyData = {
+        ...form,
+        amenities,
+        images: [
+          {
+            filename: images[0].file.name,
+            url: base64String,
+          },
+        ],
+      };
 
       const res = await fetch("http://localhost:8000/add_studio", {
         method: "POST",
-        // 'Content-Type' হেডারটি এখানে বাদ দিতে হবে, কারণ FormData পাঠালে 
-        // ব্রাউজার নিজেই সঠিক multipart/form-data বাউন্ডারি হেডার সেট করে নেয়।
-        body: payload, 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bodyData),
       });
 
       const data = await res.json();
 
-      console.log(data);
-
-      if (!res.ok) throw new Error(data.message || "Failed to add studio");
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to add studio.");
+      }
 
       resetForm();
+
       setMessage({
         success: data.message || "Studio added successfully!",
         error: "",
@@ -246,17 +275,16 @@ const AddStudio = () => {
     } catch (err) {
       setMessage({
         success: "",
-        error: err instanceof Error ? err.message : "Something went wrong.",
+        error:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong.",
       });
     } finally {
       setLoading(false);
     }
   };
 
-
-
-
-  
   return (
     <div className="min-h-full bg-slate-50 p-4 sm:p-6">
       <Link
@@ -272,7 +300,9 @@ const AddStudio = () => {
           <SquarePlus className="h-7 w-7" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Add New Studio</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Add New Studio
+          </h1>
           <p className="text-sm text-slate-500">
             List your creative space and let other creators discover it.
           </p>
@@ -297,7 +327,10 @@ const AddStudio = () => {
       >
         {/* Column 1 */}
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <SectionTitle icon={<LayoutGrid className="h-5 w-5" />} title="Basic Details" />
+          <SectionTitle
+            icon={<LayoutGrid className="h-5 w-5" />}
+            title="Basic Details"
+          />
 
           <div className="space-y-4">
             <div>
@@ -336,27 +369,42 @@ const AddStudio = () => {
               <div>
                 <Label required>Hourly Rate ($)</Label>
                 <input
-                  type="number" min={0} name="hourlyRate"
-                  value={form.hourlyRate} onChange={handleChange}
-                  required placeholder="e.g. 35" className={inputClass}
+                  type="number"
+                  min={0}
+                  name="hourlyRate"
+                  value={form.hourlyRate}
+                  onChange={handleChange}
+                  required
+                  placeholder="e.g. 35"
+                  className={inputClass}
                 />
               </div>
 
               <div>
                 <Label required>Security Deposit ($)</Label>
                 <input
-                  type="number" min={0} name="deposit"
-                  value={form.deposit} onChange={handleChange}
-                  required placeholder="e.g. 100" className={inputClass}
+                  type="number"
+                  min={0}
+                  name="deposit"
+                  value={form.deposit}
+                  onChange={handleChange}
+                  required
+                  placeholder="e.g. 100"
+                  className={inputClass}
                 />
               </div>
 
               <div>
                 <Label required>Max Capacity</Label>
                 <input
-                  type="number" min={1} name="capacity"
-                  value={form.capacity} onChange={handleChange}
-                  required placeholder="e.g. 10" className={inputClass}
+                  type="number"
+                  min={1}
+                  name="capacity"
+                  value={form.capacity}
+                  onChange={handleChange}
+                  required
+                  placeholder="e.g. 10"
+                  className={inputClass}
                 />
               </div>
 
@@ -365,8 +413,10 @@ const AddStudio = () => {
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                   <input
-                    name="location" value={form.location}
-                    onChange={handleChange} required
+                    name="location"
+                    value={form.location}
+                    onChange={handleChange}
+                    required
                     placeholder="e.g. Dhaka, Bangladesh"
                     className={`${inputClass} pl-9`}
                   />
@@ -375,16 +425,16 @@ const AddStudio = () => {
             </div>
           </div>
 
-          {/* Images */}
+          {/* Single Image Upload */}
           <div className="mt-6">
             <SectionTitle
               icon={<ImageIcon className="h-5 w-5" />}
-              title="Studio Images"
+              title="Studio Image"
               required
-              hint={`Upload high-quality images (max ${MAX_IMAGES} images).`}
+              hint="Upload one high-quality image (JPG, PNG or WEBP, max 5MB)."
             />
 
-            {images.length < MAX_IMAGES && (
+            {!images.length && (
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
@@ -396,9 +446,11 @@ const AddStudio = () => {
               >
                 <CloudUpload className="mb-2 h-9 w-9 text-blue-600" />
                 <p className="text-sm font-medium text-slate-700">
-                  Drag &amp; drop images here
+                  Drag &amp; drop image here
                 </p>
-                <p className="text-xs text-blue-600">or click to browse</p>
+                <p className="text-xs text-blue-600">
+                  or click to browse
+                </p>
               </div>
             )}
 
@@ -406,7 +458,6 @@ const AddStudio = () => {
               ref={fileRef}
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              multiple
               hidden
               onChange={(e) => {
                 addFiles(e.target.files);
@@ -414,38 +465,30 @@ const AddStudio = () => {
               }}
             />
 
-            <div className="mt-3 grid grid-cols-4 gap-3">
-              {images.map((img) => (
-                <div
-                  key={img.id}
-                  className="relative aspect-[4/3] overflow-hidden rounded-md border border-slate-200"
-                >
-                  <img src={img.url} alt="Studio preview" className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(img.id)}
-                    aria-label="Remove image"
-                    className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900/80 text-white hover:bg-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
+            {images.map((img) => (
+              <div
+                key={img.id}
+                className="relative mt-3 h-48 overflow-hidden rounded-lg border border-slate-200"
+              >
+                <img
+                  src={img.url}
+                  alt="Studio preview"
+                  className="h-full w-full object-cover"
+                />
 
-              {images.length < MAX_IMAGES && (
                 <button
                   type="button"
-                  onClick={() => fileRef.current?.click()}
-                  aria-label="Add image"
-                  className="flex aspect-[4/3] items-center justify-center rounded-md border border-dashed border-blue-300 bg-blue-50/60 text-blue-600 hover:bg-blue-50"
+                  onClick={() => removeImage(img.id)}
+                  aria-label="Remove image"
+                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/80 text-white hover:bg-red-600"
                 >
-                  <Plus className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </button>
-              )}
-            </div>
+              </div>
+            ))}
 
             <p className="mt-2 text-right text-xs text-slate-500">
-              {images.length}/{MAX_IMAGES} images
+              {images.length}/1 image
             </p>
           </div>
         </section>
@@ -461,6 +504,7 @@ const AddStudio = () => {
           <div className="grid grid-cols-2 gap-3">
             {AMENITIES.map((name) => {
               const checked = amenities.includes(name);
+
               return (
                 <label
                   key={name}
@@ -519,32 +563,43 @@ const AddStudio = () => {
             <div>
               <Label required>Host Name</Label>
               <input
-                name="hostName" value={form.hostName}
-                onChange={handleChange} required
-                placeholder="e.g. John Doe" className={inputClass}
+                name="hostName"
+                value={form.hostName}
+                onChange={handleChange}
+                required
+                placeholder="e.g. John Doe"
+                className={inputClass}
               />
             </div>
 
             <div>
               <Label required>Host Email</Label>
               <input
-                type="email" name="hostEmail"
-                value={form.hostEmail} onChange={handleChange}
-                required placeholder="e.g. john@example.com"
+                type="email"
+                name="hostEmail"
+                value={form.hostEmail}
+                onChange={handleChange}
+                required
+                placeholder="e.g. john@example.com"
                 className={inputClass}
               />
             </div>
 
             <div className="flex items-start gap-3 rounded-lg bg-blue-50 p-4 text-xs text-slate-600">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
-              <p>Your information will be verified for a trusted marketplace.</p>
+              <p>
+                Your information will be verified for a trusted marketplace.
+              </p>
             </div>
           </div>
 
           <div className="mt-auto flex gap-3 border-t border-slate-200 pt-5 lg:mt-48">
             <button
               type="button"
-              onClick={resetForm}
+              onClick={() => {
+                resetForm();
+                setMessage({ success: "", error: "" });
+              }}
               disabled={loading}
               className="flex-1 rounded-md border border-blue-600 bg-white px-4 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:opacity-50"
             >

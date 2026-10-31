@@ -10,8 +10,8 @@ import { cn } from "cn";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Explore Studios", href: "/explore" },
+  { label: "Add New Studio", href: "/add_studio" },
   { label: "How It Works", href: "/how-it-works" },
-  { label: "About Us", href: "/about" },
 ] as const;
 
 export function SiteHeader() {

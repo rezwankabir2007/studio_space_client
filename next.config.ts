@@ -7,6 +7,13 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      // লোকাল ব্যাকএন্ড থেকে ছবি লোড করার জন্য এটি যোগ করে দিন
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/uploads/**",
+      },
     ],
   },
   experimental: {
