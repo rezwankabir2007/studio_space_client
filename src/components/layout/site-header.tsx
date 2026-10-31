@@ -1,11 +1,23 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Aperture, Menu, Search, X } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button"; // variant ব্যবহারের জন্য
-import { cn } from "cn";
+import { Aperture, Menu, X, User } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -15,8 +27,16 @@ const navLinks = [
 ] as const;
 
 export function SiteHeader() {
+  const { data: session, isPending } = authClient.useSession();
+
+  const user = session?.user;
+
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-navy text-white shadow-md">
@@ -49,35 +69,74 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Link
-            href="/explore"
-            aria-label="Search studios"
-            className="flex size-9 items-center justify-center rounded-full border border-white/25 text-white/90 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <Search className="size-4" aria-hidden />
-          </Link>
+          {!isPending && (
+            user ? (
+              <Popover>
+                <PopoverTrigger className="rounded-full focus:outline-none focus:ring-2 focus:ring-white/50">
+                  <Avatar>
+                    <AvatarImage
+                      referrerPolicy="no-referrer"
+                      src={user?.image || undefined}
+                    />
+                    <AvatarFallback>
+                      {user?.name?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </PopoverTrigger>
 
-          {/* Login Link using buttonVariants to avoid Base UI warning */}
-          <Link
-            href="/login"
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "h-9 border-white/30 bg-transparent px-4 text-white hover:bg-white/10 hover:text-white"
-            )}
-          >
-            Login
-          </Link>
+                <PopoverContent className="w-56 text-foreground">
+                  <PopoverHeader className="text-left">
+                    <PopoverTitle>{user?.name}</PopoverTitle>
+                    <PopoverDescription className="text-xs text-muted-foreground truncate">
+                      {user?.email}
+                    </PopoverDescription>
+                  </PopoverHeader>
 
-          {/* Register Link using buttonVariants */}
-          <Link
-            href="/register"
-            className={cn(
-              buttonVariants({ variant: "default" }),
-              "h-9 bg-brand px-4 hover:bg-brand-dark text-white"
-            )}
-          >
-            Register
-          </Link>
+                  <div className="mt-3 flex flex-col gap-1">
+                    <Link
+                      href="/myprofile"
+                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
+                    >
+                      <User className="size-4" />
+                      Profile
+                    </Link>
+
+                    <Separator className="my-1" />
+
+                    <Button
+                      onClick={handleSignOut}
+                      variant="destructive"
+                      className="w-full justify-start text-xs h-8"
+                    >
+                      Signout
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "h-9 border-white/30 bg-transparent px-4 text-white hover:bg-white/10 hover:text-white"
+                  )}
+                >
+                  Login
+                </Link>
+
+                <Link
+                  href="/register"
+                  className={cn(
+                    buttonVariants({ variant: "default" }),
+                    "h-9 bg-brand px-4 hover:bg-brand-dark text-white"
+                  )}
+                >
+                  Register
+                </Link>
+              </>
+            )
+          )}
         </div>
 
         <button
@@ -115,27 +174,70 @@ export function SiteHeader() {
               );
             })}
           </ul>
+
           <div className="flex gap-3 px-3 pt-1">
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "h-9 flex-1 border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
-              )}
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setOpen(false)}
-              className={cn(
-                buttonVariants({ variant: "default" }),
-                "h-9 flex-1 bg-brand hover:bg-brand-dark text-white"
-              )}
-            >
-              Register
-            </Link>
+            {!isPending && (
+              user ? (
+                <div className="flex flex-col gap-2 w-full">
+                  <div className="flex items-center gap-3 py-2">
+                    <Avatar>
+                      <AvatarImage
+                        referrerPolicy="no-referrer"
+                        src={user?.image || undefined}
+                      />
+                      <AvatarFallback>
+                        {user?.name?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium text-white">{user?.name}</p>
+                      <p className="text-xs text-white/70">{user?.email}</p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20"
+                  >
+                    <User className="size-4" />
+                    Profile
+                  </Link>
+
+                  <Button
+                    onClick={handleSignOut}
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    Signout
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex gap-3 w-full">
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "h-9 flex-1 border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                    )}
+                  >
+                    Login
+                  </Link>
+
+                  <Link
+                    href="/register"
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "default" }),
+                      "h-9 flex-1 bg-brand hover:bg-brand-dark text-white"
+                    )}
+                  >
+                    Register
+                  </Link>
+                </div>
+              )
+            )}
           </div>
         </nav>
       )}

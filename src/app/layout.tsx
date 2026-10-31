@@ -4,8 +4,8 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import "./globals.css";
 
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// Sonner Toast import
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     "Peer-to-peer creative workspace and production studio sharing. Discover and book professional photography studios, sound stages, podcast rooms, music suites, and art workshops.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
@@ -32,12 +32,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <SiteHeader />
         <main className="flex-1">{children}</main>
+        
+        {/* Sonner Toaster Component */}
+        <Toaster richColors position="top-right" />
 
-  <ToastContainer
-    position="top-right"
-    autoClose={3000}
-    theme="colored"
-  />
         <SiteFooter />
       </body>
     </html>
