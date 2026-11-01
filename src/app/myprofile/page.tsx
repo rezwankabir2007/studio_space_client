@@ -121,7 +121,7 @@ const MyProfile = () => {
 
         {/* Profile Header */}
         <Card className="overflow-hidden border-none shadow-sm">
-          <div className="h-36 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/30 relative">
+          <div className="h-36 bg-linear-to-r from-primary/90 via-primary/70 to-primary/30 relative">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,white,transparent_45%)]" />
           </div>
 

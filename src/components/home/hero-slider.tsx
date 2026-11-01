@@ -78,7 +78,7 @@ export function HeroSlider() {
 
           {/* Host Your Space Link */}
           <Link
-            href="/host"
+            href="/explore?category=host"
             className={cn(
               buttonVariants({ variant: "outline" }),
               "h-11 border-white/40 bg-transparent px-6 text-sm text-white hover:bg-white/10 hover:text-white"

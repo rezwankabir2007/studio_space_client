@@ -1,3 +1,4 @@
+
 import ExploreStudiosClient from "@/components/ExploreStudiosClient";
 
 async function getStudios() {
@@ -7,21 +8,37 @@ async function getStudios() {
     });
 
     if (!res.ok) {
-      console.error(`Fetch failed with status: ${res.status}`);
-      return [];
+      console.error(`Fetch failed: ${res.status}`);
+
+      return {
+        studios: [],
+        fetchError: true,
+      };
     }
 
     const data = await res.json();
-    // API response data array or object handle
-    return Array.isArray(data) ? data : data.studios || [];
+
+    return {
+      studios: Array.isArray(data) ? data : data.studios || [],
+      fetchError: false,
+    };
   } catch (error) {
-    console.error("Error fetching studios from backend:", error);
-    return [];
+    console.error("Error fetching studios:", error);
+
+    return {
+      studios: [],
+      fetchError: true,
+    };
   }
 }
 
 export default async function Page() {
-  const studios = await getStudios();
+  const { studios, fetchError } = await getStudios();
 
-  return <ExploreStudiosClient studios={studios} />;
+  return (
+    <ExploreStudiosClient
+      studios={studios}
+      fetchError={fetchError}
+    />
+  );
 }

@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Heart, MapPin, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "cn";
 import { categories, type Studio } from "@/lib/data";
 
@@ -12,7 +11,7 @@ function categoryBadge(slug: Studio["categorySlug"]) {
 export function StudioCard({ studio }: { studio: Studio }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-      <div className="relative aspect-[4/3] w-full">
+      <div className="relative aspect-4/3 w-full">
         <Image
           src={studio.image}
           alt={studio.name}
@@ -51,13 +50,13 @@ export function StudioCard({ studio }: { studio: Studio }) {
           <MapPin className="size-3" aria-hidden />
           {studio.location}
         </p>
-        <Button
-          render={<Link href={`/studios/${studio.slug}`} />}
-          className="mt-auto h-8 w-full gap-1.5 bg-brand text-xs hover:bg-brand-dark"
+        <Link
+          href={`/studios/${studio.slug}`}
+          className="mt-auto inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-md bg-brand text-xs font-medium text-white transition-colors hover:bg-brand-dark"
         >
           View Details
           <ArrowRight className="size-3" aria-hidden />
-        </Button>
+        </Link>
       </div>
     </article>
   );

@@ -1,8 +1,19 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, MapPin, Heart, Star } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Heart,
+  Star,
+  SearchX,
+  ArrowRight,
+  Building2,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
 import Image from "next/image";
 
 interface Studio {
@@ -21,6 +32,11 @@ interface Studio {
   createdAt?: string;
 }
 
+interface ExploreStudiosClientProps {
+  studios?: Studio[];
+  fetchError?: boolean;
+}
+
 const categories = [
   "Photo Studio",
   "Sound Stage",
@@ -30,7 +46,10 @@ const categories = [
   "Film & Production",
 ];
 
-const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
+const ExploreStudiosClient = ({
+  studios = [],
+  fetchError = false,
+}: ExploreStudiosClientProps) => {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -58,11 +77,11 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
 
   const getImage = (studio: Studio) => {
     const firstImage = studio.images?.[0];
-    
+
     if (typeof firstImage === "object" && firstImage?.url) {
       return firstImage.url;
     }
-    
+
     if (typeof firstImage === "string") {
       return firstImage;
     }
@@ -71,11 +90,11 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
       return studio.imageUrl;
     }
 
-    return ""; 
+    return "";
   };
 
   const filteredStudios = useMemo(() => {
-    const result: Studio[] = (studios || []).filter((studio) => {
+    const result = (studios || []).filter((studio) => {
       const price = Number(studio.hourlyRate) || 0;
 
       const matchesSearch =
@@ -97,7 +116,9 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
 
       const matchesRating =
         !rating ||
-        (studio.rating !== undefined ? studio.rating >= Number(rating) : true);
+        (studio.rating !== undefined
+          ? studio.rating >= Number(rating)
+          : true);
 
       return (
         matchesSearch &&
@@ -109,9 +130,13 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
     });
 
     if (sort === "low") {
-      result.sort((a, b) => Number(a.hourlyRate) - Number(b.hourlyRate));
+      result.sort(
+        (a, b) => Number(a.hourlyRate) - Number(b.hourlyRate)
+      );
     } else if (sort === "high") {
-      result.sort((a, b) => Number(b.hourlyRate) - Number(a.hourlyRate));
+      result.sort(
+        (a, b) => Number(b.hourlyRate) - Number(a.hourlyRate)
+      );
     } else if (sort === "newest") {
       result.sort(
         (a, b) =>
@@ -144,11 +169,14 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
-      {/* Main Content Layout */}
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-6 py-6 md:grid-cols-[260px_1fr]">
-        {/* Left Sidebar Filter */}
+
+        {/* Sidebar Filters */}
         <aside className="h-fit rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">Categories</h3>
+          <h3 className="mb-3 text-sm font-semibold text-slate-900">
+            Categories
+          </h3>
+
           <div className="space-y-2.5">
             {categories.map((category) => (
               <label
@@ -159,19 +187,19 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
                   type="checkbox"
                   checked={selectedCategories.includes(category)}
                   onChange={() => toggleCategory(category)}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600"
+                  className="h-4 w-4 accent-blue-600"
                 />
-                <span>
-                  {category}
-                  {category.endsWith("s") ? "" : "s"}
-                </span>
+                <span>{category}</span>
               </label>
             ))}
           </div>
 
           <hr className="my-5 border-slate-100" />
 
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">Price Range</h3>
+          <h3 className="mb-3 text-sm font-semibold text-slate-900">
+            Price Range
+          </h3>
+
           <div className="space-y-3">
             <input
               type="range"
@@ -179,9 +207,10 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
               max="10000"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
-              className="w-full accent-blue-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg appearance-none"
+              className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-blue-600"
             />
-            <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+
+            <div className="flex items-center justify-between text-xs font-medium text-slate-500">
               <span>${minPrice}</span>
               <span>${maxPrice}</span>
             </div>
@@ -189,7 +218,10 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
 
           <hr className="my-5 border-slate-100" />
 
-          <h3 className="mb-2.5 text-sm font-semibold text-slate-900">Location</h3>
+          <h3 className="mb-2.5 text-sm font-semibold text-slate-900">
+            Location
+          </h3>
+
           <input
             type="text"
             value={location}
@@ -200,8 +232,11 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
 
           <hr className="my-5 border-slate-100" />
 
-          <h3 className="mb-2 text-sm font-semibold text-slate-900">Rating</h3>
-          <div className="mb-3 flex gap-0.5 text-amber-400 text-sm">
+          <h3 className="mb-2 text-sm font-semibold text-slate-900">
+            Rating
+          </h3>
+
+          <div className="mb-3 flex gap-0.5 text-sm text-amber-400">
             ★ ★ ★ ★ <span className="text-slate-300">★</span>
           </div>
 
@@ -225,7 +260,10 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
 
           <hr className="my-5 border-slate-100" />
 
-          <h3 className="mb-2 text-sm font-semibold text-slate-900">Sort By</h3>
+          <h3 className="mb-2 text-sm font-semibold text-slate-900">
+            Sort By
+          </h3>
+
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
@@ -238,38 +276,103 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
 
           <button
             onClick={clearFilters}
-            className="mt-6 w-full rounded-lg border border-slate-300 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
+            className="mt-6 w-full rounded-lg border border-slate-300 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
           >
             Clear Filters
           </button>
         </aside>
 
-        {/* Right Content Area */}
+        {/* Studios Content */}
         <section>
           <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
             <div className="flex flex-1 items-center gap-2">
               <Search className="text-slate-400" size={18} />
+
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search studios, locations..."
-                className="w-full bg-transparent text-xs outline-none text-slate-700 placeholder:text-slate-400"
+                className="w-full bg-transparent text-xs text-slate-700 outline-none placeholder:text-slate-400"
               />
             </div>
-            <span className="whitespace-nowrap text-xs text-slate-400 font-medium">
-              {filteredStudios.length} studios found
-            </span>
+
+            {!fetchError && (
+              <span className="whitespace-nowrap text-xs font-medium text-slate-400">
+                {filteredStudios.length} studios found
+              </span>
+            )}
           </div>
 
-          {filteredStudios.length > 0 ? (
+          {/* API Error State */}
+          {fetchError ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-red-100 bg-white px-6 py-16 text-center">
+              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
+                <AlertCircle size={38} className="text-red-500" />
+              </div>
+
+              <h3 className="text-xl font-bold text-slate-900">
+                Something Went Wrong
+              </h3>
+
+              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                We couldn&apos;t load the studios right now. Please try again later.
+              </p>
+
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+              >
+                <RefreshCw size={16} />
+                Try Again
+              </button>
+            </div>
+
+          ) : filteredStudios.length === 0 ? (
+
+            /* Empty State */
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50">
+                {studios.length === 0 ? (
+                  <Building2 size={38} className="text-blue-600" />
+                ) : (
+                  <SearchX size={38} className="text-blue-600" />
+                )}
+              </div>
+
+              <h3 className="text-xl font-bold text-slate-900">
+                {studios.length === 0
+                  ? "No Studios Available Yet"
+                  : "No Studios Found"}
+              </h3>
+
+              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                {studios.length === 0
+                  ? "There are no studios listed at the moment. Please check back later."
+                  : "We couldn't find any studios matching your search. Try changing your keywords or adjusting your filters."}
+              </p>
+
+              {studios.length > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                >
+                  Clear All Filters
+                  <ArrowRight size={16} />
+                </button>
+              )}
+            </div>
+
+          ) : (
+
+            /* Studio Cards */
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {filteredStudios.map((studio) => (
                 <div
                   key={studio._id}
                   className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
                 >
-                  <div className="relative h-44 bg-slate-100 overflow-hidden">
+                  <div className="relative h-44 overflow-hidden bg-slate-100">
                     {getImage(studio) ? (
                       <Image
                         src={getImage(studio)}
@@ -306,18 +409,16 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
                   </div>
 
                   <div className="p-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="truncate text-sm font-bold text-slate-900">
-                        {studio.title}
-                      </h2>
-                    </div>
+                    <h2 className="truncate text-sm font-bold text-slate-900">
+                      {studio.title}
+                    </h2>
 
                     <div className="mt-1 flex items-baseline justify-between">
                       <div className="flex items-baseline gap-1">
                         <span className="text-lg font-extrabold text-blue-600">
                           ${studio.hourlyRate}
                         </span>
-                        <span className="text-xs text-slate-500 font-normal">
+                        <span className="text-xs font-normal text-slate-500">
                           / hr
                         </span>
                       </div>
@@ -328,9 +429,11 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
                             size={13}
                             className="fill-amber-400 text-amber-400"
                           />
+
                           <span className="font-semibold text-slate-800">
                             {studio.rating}
                           </span>
+
                           {studio.reviewCount !== undefined && (
                             <span className="text-slate-400">
                               ({studio.reviewCount})
@@ -341,7 +444,7 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
                     </div>
 
                     <p className="mt-2.5 flex items-center gap-1.5 text-xs text-slate-500">
-                      <MapPin size={14} className="text-slate-400 shrink-0" />
+                      <MapPin size={14} className="shrink-0 text-slate-400" />
                       <span className="truncate">{studio.location}</span>
                     </p>
 
@@ -354,21 +457,6 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
                   </div>
                 </div>
               ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-slate-200 bg-white py-16 text-center">
-              <h3 className="text-base font-semibold text-slate-800">
-                No Studios Found
-              </h3>
-              <p className="mt-1 text-xs text-slate-500">
-                Try changing your search keywords or adjusting your filters.
-              </p>
-              <button
-                onClick={clearFilters}
-                className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700"
-              >
-                Clear Filters
-              </button>
             </div>
           )}
         </section>
