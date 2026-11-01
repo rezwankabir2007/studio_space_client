@@ -23,7 +23,7 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "Explore Studios", href: "/explore" },
   { label: "Add New Studio", href: "/add_studio" },
-  { label: "How It Works", href: "/how-it-works" },
+  { label: "My Bookings", href: "/my-bookings" },
 ] as const;
 
 export function SiteHeader() {

@@ -1,7 +1,7 @@
 
 import { HeroSlider } from "@/components/home/hero-slider";
 import FeaturedStudios from "@/components/home/featured-studios";
-import { HowItWorks } from "@/components/home/how-it-works";
+// import { HowItWorks } from "@/components/home/my-bookings";
 import { StudioCategories } from "@/components/home/studio-categories";
 
 export default function Home() {
@@ -11,7 +11,7 @@ export default function Home() {
       <HeroSlider />
       <FeaturedStudios/>
       <StudioCategories />
-      <HowItWorks />
+    
     </>
   );
 }

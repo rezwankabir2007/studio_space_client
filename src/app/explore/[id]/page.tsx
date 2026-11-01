@@ -1,3 +1,4 @@
+
 "use client";
 
 import { use, useCallback, useEffect, useState } from "react";
@@ -10,18 +11,18 @@ import {
   Users,
   DollarSign,
   ShieldCheck,
-  Mail,
   CheckCircle2,
   Loader2,
 } from "lucide-react";
 
 import EditStudioDialog from "@/components/EditStudioDialog";
 import DeleteStudiosDialoge from "@/components/DeleteStudiosDialoge";
+import BookingCard from "@/components/BookingCard/page";
 
 // Image Type
 interface ImageObject {
   filename?: string;
-  url?: string;
+  url: string;
 }
 
 // Studio Type
@@ -37,24 +38,22 @@ interface StudioDetail {
   hostName?: string;
   hostEmail?: string;
   amenities?: string[];
-  images?: ImageObject[] | string[];
+  images?: (ImageObject | string)[];
 }
 
-const ExploreDetailsPage = ({
-  params,
-}: {
+interface ExploreDetailsPageProps {
   params: Promise<{ id: string }>;
-}) => {
-  // URL theke ID ber kora
+}
+
+const ExploreDetailsPage = ({ params }: ExploreDetailsPageProps) => {
   const { id } = use(params);
 
-  // States
   const [exploreData, setExploreData] =
     useState<StudioDetail | null>(null);
 
   const [loading, setLoading] = useState(true);
 
-  // 1. API theke Studio data fetch
+  // Get Studio Data
   const getStudio = useCallback(async () => {
     const res = await fetch(
       `http://localhost:8000/exploreStudios/${id}`,
@@ -72,18 +71,17 @@ const ExploreDetailsPage = ({
     return data as StudioDetail;
   }, [id]);
 
-  // 2. Edit successful hole abar data fetch
+  // Refetch After Edit
   const fetchStudio = useCallback(async () => {
     try {
       const data = await getStudio();
-
       setExploreData(data);
     } catch (error) {
       console.error("Error fetching studio:", error);
     }
   }, [getStudio]);
 
-  // 3. Page load hole initial data fetch
+  // Initial Data Fetch
   useEffect(() => {
     let cancelled = false;
 
@@ -107,11 +105,10 @@ const ExploreDetailsPage = ({
     };
   }, [getStudio]);
 
-  // 4. Images ke same format-e convert kora
+  // Normalize Images
   const editStudioData = exploreData
     ? {
         ...exploreData,
-
         images: (exploreData.images ?? []).flatMap((image) => {
           if (typeof image === "string") {
             return [{ url: image }];
@@ -131,7 +128,7 @@ const ExploreDetailsPage = ({
       }
     : null;
 
-  // 5. Main image
+  // Main Image
   const firstImage = exploreData?.images?.[0];
 
   const mainImage =
@@ -149,7 +146,7 @@ const ExploreDetailsPage = ({
     );
   }
 
-  // Data not found
+  // Data Not Found
   if (!exploreData) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-slate-50 text-center">
@@ -223,7 +220,6 @@ const ExploreDetailsPage = ({
 
         {/* Banner Image */}
         <div className="relative h-[320px] w-full overflow-hidden rounded-2xl bg-slate-200 shadow-sm sm:h-[450px]">
-
           <Image
             src={mainImage}
             alt={exploreData.title || "Studio Image"}
@@ -233,7 +229,6 @@ const ExploreDetailsPage = ({
             className="object-cover"
             unoptimized
           />
-
         </div>
 
         {/* Content Grid */}
@@ -244,7 +239,6 @@ const ExploreDetailsPage = ({
 
             {/* About Studio */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
               <h2 className="mb-3 text-base font-bold text-slate-900">
                 About This Studio
               </h2>
@@ -253,7 +247,6 @@ const ExploreDetailsPage = ({
                 {exploreData.description ||
                   "No description provided for this studio space."}
               </p>
-
             </div>
 
             {/* Quick Info */}
@@ -261,7 +254,6 @@ const ExploreDetailsPage = ({
 
               {/* Hourly Rate */}
               <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                   <DollarSign size={20} />
                 </div>
@@ -275,13 +267,11 @@ const ExploreDetailsPage = ({
                     ${exploreData.hourlyRate}
                   </p>
                 </div>
-
               </div>
 
               {/* Capacity */}
               {exploreData.capacity && (
                 <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                     <Users size={20} />
                   </div>
@@ -295,14 +285,12 @@ const ExploreDetailsPage = ({
                       {exploreData.capacity} People
                     </p>
                   </div>
-
                 </div>
               )}
 
               {/* Deposit */}
               {exploreData.deposit && (
                 <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                     <ShieldCheck size={20} />
                   </div>
@@ -316,7 +304,6 @@ const ExploreDetailsPage = ({
                       ${exploreData.deposit}
                     </p>
                   </div>
-
                 </div>
               )}
 
@@ -325,7 +312,6 @@ const ExploreDetailsPage = ({
             {/* Amenities */}
             {exploreData.amenities &&
               exploreData.amenities.length > 0 && (
-
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
                   <h2 className="mb-4 text-base font-bold text-slate-900">
@@ -339,96 +325,25 @@ const ExploreDetailsPage = ({
                         key={index}
                         className="flex items-center gap-2.5 text-xs font-medium text-slate-700"
                       >
-
                         <CheckCircle2
                           size={16}
                           className="shrink-0 text-blue-600"
                         />
 
                         <span>{amenity}</span>
-
                       </div>
                     ))}
 
                   </div>
-
                 </div>
               )}
 
           </div>
 
-          {/* Right Card */}
-          <div>
-
-            <div className="sticky top-24 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-              <div>
-                <span className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                  Starting From
-                </span>
-
-                <div className="mt-1 flex items-baseline gap-1">
-
-                  <span className="text-3xl font-extrabold text-blue-600">
-                    ${exploreData.hourlyRate}
-                  </span>
-
-                  <span className="text-xs font-medium text-slate-500">
-                    / hour
-                  </span>
-
-                </div>
-              </div>
-
-              <hr className="border-slate-100" />
-
-              {/* Host Information */}
-              {exploreData.hostName && (
-
-                <div className="space-y-3">
-
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
-                    Hosted By
-                  </h3>
-
-                  <div className="flex items-center gap-3">
-
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700">
-                      {exploreData.hostName.charAt(0)}
-                    </div>
-
-                    <div>
-
-                      <p className="text-xs font-bold text-slate-900">
-                        {exploreData.hostName}
-                      </p>
-
-                      {exploreData.hostEmail && (
-                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-500">
-                          <Mail size={12} />
-                          {exploreData.hostEmail}
-                        </p>
-                      )}
-
-                    </div>
-                  </div>
-
-                </div>
-              )}
-
-              <button
-                type="button"
-                className="w-full rounded-xl bg-blue-600 py-3 text-center text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700"
-              >
-                Book This Studio
-              </button>
-
-            </div>
-
-          </div>
+          {/* Right Booking Card */}
+          <BookingCard exploreData={exploreData} />
 
         </div>
-
       </main>
     </div>
   );

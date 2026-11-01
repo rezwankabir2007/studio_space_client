@@ -95,12 +95,12 @@ const Studios = async () => {
               </div>
 
               {/* Action Button */}
-              <Link
-                href={`/studios/${studio._id}`}
-                className="w-full mt-2 bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl text-center hover:bg-blue-700 transition-colors block"
-              >
-                View Details
-              </Link>
+            <Link
+  href={`/studios/${studio._id}`}
+  className="w-full mt-2 bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl text-center hover:bg-blue-700 transition-colors block"
+>
+  View Details
+</Link>
             </div>
           </div>
         ))}

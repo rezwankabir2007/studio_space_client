@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, MapPin, Heart, Star, ChevronDown } from "lucide-react";
+import { Search, MapPin, Heart, Star } from "lucide-react";
 import Image from "next/image";
 
 interface Studio {
@@ -35,7 +35,7 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
   const [location, setLocation] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(10000); // 1000 এর বদলে 10000 দেওয়া হলো
+  const [maxPrice, setMaxPrice] = useState(10000);
   const [rating, setRating] = useState("");
   const [sort, setSort] = useState("newest");
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -56,7 +56,6 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
     );
   };
 
-  // ইমেজ বের করার হেল্পার ফাংশন
   const getImage = (studio: Studio) => {
     const firstImage = studio.images?.[0];
     
@@ -145,50 +144,6 @@ const ExploreStudiosClient = ({ studios = [] }: { studios: Studio[] }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
-      {/* Top Navigation */}
-      <nav className="border-b bg-white sticky top-0 z-50">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
-              S
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">
-              Studio<span className="text-blue-600">Space</span>
-            </span>
-          </Link>
-
-          <div className="hidden items-center gap-8 text-sm font-medium md:flex text-slate-600">
-            <Link href="/" className="hover:text-blue-600">
-              Home
-            </Link>
-            <Link
-              href="/explore"
-              className="border-b-2 border-blue-600 pb-1 font-semibold text-blue-600"
-            >
-              Explore Studios
-            </Link>
-            <Link href="/how-it-works" className="hover:text-blue-600">
-              How It Works
-            </Link>
-            <Link href="/about" className="hover:text-blue-600">
-              About Us
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button aria-label="Search" className="text-slate-600 hover:text-slate-900">
-              <Search className="h-5 w-5" />
-            </button>
-            <div className="flex items-center gap-1.5 cursor-pointer">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-700 font-semibold text-sm">
-                U
-              </div>
-              <ChevronDown size={14} className="text-slate-500" />
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Main Content Layout */}
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-6 py-6 md:grid-cols-[260px_1fr]">
         {/* Left Sidebar Filter */}
