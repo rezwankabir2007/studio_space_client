@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Aperture, Home, Search } from "lucide-react";
+import { Aperture, Home} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
@@ -28,12 +28,7 @@ export default function NotFound() {
           </Link>
         </Button>
 
-        {/* <Button variant="outline" asChild>
-          <Link href="/explore">
-            <Search className="mr-2 size-4" />
-            Explore Studios
-          </Link>
-        </Button> */}
+      
       </div>
     </section>
   );

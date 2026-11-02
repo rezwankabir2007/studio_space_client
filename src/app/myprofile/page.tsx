@@ -69,7 +69,7 @@ const MyProfile = () => {
         setError(null);
 
         const response = await fetch(
-          `http://localhost:8000/studios?email=${encodeURIComponent(
+          `${process.env.NEXT_PUBLIC_API_URL}/studios?email=${encodeURIComponent(
             session.user.email
           )}`
         );

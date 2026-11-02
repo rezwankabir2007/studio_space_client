@@ -32,7 +32,7 @@ interface Studio {
 async function getStudios(): Promise<Studio[]> {
   try {
     const res = await fetch(
-      "http://localhost:8000/exploreStudios",
+      `${process.env.NEXT_PUBLIC_API_URL}/exploreStudios`,
       { cache: "no-store" }
     );
 

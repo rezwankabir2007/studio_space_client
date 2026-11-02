@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 async function getStudios() {
   try {
-    const res = await fetch("http://localhost:8000/exploreStudios", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/exploreStudios`, {
       cache: "no-store",
     });
 

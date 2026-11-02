@@ -59,7 +59,7 @@ const ExploreDetailsPage = ({ params }: ExploreDetailsPageProps) => {
 const token = await getTokenFromClient();
 
     const res = await fetch(
-      `http://localhost:8000/exploreStudios/${id}`,{
+      `${process.env.NEXT_PUBLIC_API_URL}/exploreStudios/${id}`,{
         headers:{
          authorization: `Bearer ${token}`
         },

@@ -10,7 +10,7 @@ const emptySubscribe = () => () => {};
 export default function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   
-  // useSyncExternalStore দিয়ে খুব নিরাপদে ক্লায়েন্ট মাউন্ট চেক করা (কোনো ওয়ার্নিং ছাড়াই)
+  
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,

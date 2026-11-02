@@ -169,7 +169,7 @@ export default function EditStudioDialog({
 
       // 2. Fetch request-e Authorization header add kora holo
       const res = await fetch(
-        `http://localhost:8000/exploreStudios/${exploreData._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/exploreStudios/${exploreData._id}`,
         {
           method: "PATCH",
           headers: {

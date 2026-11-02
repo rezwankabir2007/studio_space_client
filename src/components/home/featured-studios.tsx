@@ -18,7 +18,7 @@ type Studio = {
 };
 
 const Studios = async () => {
-  const res = await fetch("http://localhost:8000/exploreStudios");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/exploreStudios`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch studios");

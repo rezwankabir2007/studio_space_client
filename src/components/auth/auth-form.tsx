@@ -74,7 +74,7 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
       });
     } catch (error) {
       console.error("Google Auth Error:", error);
-      toast.error("Google দিয়ে সাইন ইন করতে সমস্যা হয়েছে।");
+      toast.error("Sign-in with Google failed. Please try again.");
     }
   };
 

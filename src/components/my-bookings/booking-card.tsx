@@ -73,7 +73,7 @@ const BookingCard = ({ booking }: BookingCardProps) => {
       const token = await getTokenFromClient(); // Assuming you have a function to get the token
 
       const res = await fetch(
-        `http://localhost:8000/booking/${booking._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/booking/${booking._id}`,
         {
           method: "DELETE",
           headers: {

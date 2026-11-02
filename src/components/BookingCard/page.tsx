@@ -114,7 +114,7 @@ const BookingCard = ({ exploreData }: BookingCardProps) => {
       };
 
       // Send Data to Backend
-      const res = await fetch("http://localhost:8000/booking", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/booking`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
