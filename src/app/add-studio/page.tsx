@@ -8,6 +8,8 @@ import {
   SquarePlus, User, X, Blocks, FileText,
 } from "lucide-react";
 import Image from "next/image";
+import { authClient } from "@/lib/auth-client";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const CATEGORIES = [
   "Photo Studio", "Sound Stage", "Podcast Room",
@@ -66,7 +68,6 @@ const SectionTitle = ({
   </div>
 );
 
-// ফাইলকে Base64 এ কনভার্ট করার হেল্পার ফাংশন
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -238,10 +239,8 @@ const AddStudio = () => {
     setLoading(true);
 
     try {
-      // ফাইলটি সরাসরি Base64 স্ট্রিং বানিয়ে নেওয়া
       const base64String = await fileToBase64(images[0].file);
 
-      // JSON বডি পেলোড
       const bodyData = {
         ...form,
         amenities,
@@ -253,10 +252,15 @@ const AddStudio = () => {
         ],
       };
 
+      
+const token = await getTokenFromClient();
+
+
       const res = await fetch("http://localhost:8000/add_studio", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(bodyData),
       });
@@ -426,7 +430,6 @@ const AddStudio = () => {
             </div>
           </div>
 
-          {/* Single Image Upload */}
           <div className="mt-6">
             <SectionTitle
               icon={<ImageIcon className="h-5 w-5" />}
@@ -465,8 +468,6 @@ const AddStudio = () => {
                 e.target.value = "";
               }}
             />
-
-
 
             {images.map((img) => (
               <div key={img.id} className="relative mt-2 h-36 w-full overflow-hidden rounded-lg border border-slate-200">
@@ -508,10 +509,11 @@ const AddStudio = () => {
               return (
                 <label
                   key={name}
-                  className={`flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm transition ${checked
+                  className={`flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm transition ${
+                    checked
                       ? "border-blue-300 bg-blue-50/50"
                       : "border-slate-200 bg-white hover:bg-slate-50"
-                    }`}
+                  }`}
                 >
                   <input
                     type="checkbox"

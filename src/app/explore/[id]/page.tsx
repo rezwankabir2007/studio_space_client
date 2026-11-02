@@ -1,6 +1,6 @@
 
 "use client";
-
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 import { use, useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -55,9 +55,14 @@ const ExploreDetailsPage = ({ params }: ExploreDetailsPageProps) => {
 
   // Get Studio Data
   const getStudio = useCallback(async () => {
+
+const token = await getTokenFromClient();
+
     const res = await fetch(
-      `http://localhost:8000/exploreStudios/${id}`,
-      {
+      `http://localhost:8000/exploreStudios/${id}`,{
+        headers:{
+         authorization: `Bearer ${token}`
+        },
         cache: "no-store",
       }
     );
