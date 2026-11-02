@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -12,6 +11,9 @@ import {
   Palette,
   Sparkles,
 } from "lucide-react";
+
+// DYNAMIC_SERVER_USAGE error fix করার জন্য force-dynamic কনফিগারেশন
+export const dynamic = "force-dynamic";
 
 interface Studio {
   _id: string;
