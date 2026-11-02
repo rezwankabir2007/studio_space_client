@@ -1,5 +1,7 @@
-
 import ExploreStudiosClient from "@/components/ExploreStudiosClient";
+
+// বিল্ড টাইমে স্ট্যাটিক জেনারেট করা থেকে বিরত রাখতে এটি ব্যবহার করা হলো
+export const dynamic = 'force-dynamic';
 
 async function getStudios() {
   try {

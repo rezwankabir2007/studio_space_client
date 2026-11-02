@@ -38,7 +38,17 @@ const MyBookingPage = async () => {
   }
 
   // 1. Token ta ekhane fetch kora hocche
+
   const token = await getTokenFromServer();
+
+
+  // const jwtToken = await auth.api.getToken({
+  //   headers: await headers(),
+  // })
+
+  // const token = jwtToken?.token
+  // console.log("JWT Token:", token);
+
 
   // 2. Fetch request-e Authorization header-er maddhome token ta pathano hocche
   const res = await fetch(
@@ -46,7 +56,7 @@ const MyBookingPage = async () => {
     {
       cache: "no-store",
       headers: {
-        Authorization: `Bearer ${token}`,
+        authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     }
