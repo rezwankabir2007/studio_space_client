@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 interface ImageObject {
   filename?: string;
@@ -69,10 +70,15 @@ const BookingCard = ({ booking }: BookingCardProps) => {
     try {
       setDeleting(true);
 
+      const token = await getTokenFromClient(); // Assuming you have a function to get the token
+
       const res = await fetch(
         `http://localhost:8000/booking/${booking._id}`,
         {
           method: "DELETE",
+          headers: {
+            authorization: `Bearer ${token}`,
+          }
         }
       );
 

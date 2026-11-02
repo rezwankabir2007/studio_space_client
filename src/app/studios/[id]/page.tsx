@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,7 +29,7 @@ interface Studio {
   amenities: string[];
 }
 
-// Fetch Single Studio
+// Fetch Single Studio (Updated to /studios/:id)
 async function getStudio(id: string): Promise<Studio | null> {
   const res = await fetch(
     `http://localhost:8000/exploreStudios/${id}`,

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { authClient } from "@/lib/auth-client";
@@ -42,19 +41,35 @@ const BookingCard = ({ exploreData }: BookingCardProps) => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  
+  // Modal & Date/Time States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookingDate, setBookingDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
-  // Booking Function
-  const handleBooking = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  // Step 1: When user clicks "Book This Studio" button
+  const handleOpenModal = (e: React.MouseEvent) => {
     e.preventDefault();
 
-    // Login Check
     if (isPending) return;
 
     if (!user) {
       toast.error("Please login first!");
       router.push("/login");
+      return;
+    }
+
+    // Open the modal/popup
+    setIsModalOpen(true);
+  };
+
+  // Step 2: When user submits date & time from the modal
+  const handleBookingSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!bookingDate || !startTime || !endTime) {
+      toast.error("Please select booking date, start time, and end time!");
       return;
     }
 
@@ -66,14 +81,13 @@ const BookingCard = ({ exploreData }: BookingCardProps) => {
         if (typeof image === "string") {
           return { url: image };
         }
-
         return image;
       });
 
-      // Booking Data
+      // Booking Data (including date and time)
       const bookingData = {
-        userName: user.name,
-        userEmail: user.email,
+        userName: user?.name,
+        userEmail: user?.email,
 
         studioId: exploreData._id,
         studioTitle: exploreData.title,
@@ -92,7 +106,10 @@ const BookingCard = ({ exploreData }: BookingCardProps) => {
         amenities: exploreData.amenities ?? [],
         images: studioImages,
 
-        bookingDate: new Date().toISOString(),
+        // Selected Date & Times from Modal
+        bookingDate: bookingDate,
+        startTime: startTime,
+        endTime: endTime,
         status: "pending",
       };
 
@@ -108,13 +125,12 @@ const BookingCard = ({ exploreData }: BookingCardProps) => {
       const result = await res.json();
 
       if (!res.ok || !result.success) {
-        throw new Error(
-          result.message || "Booking failed!"
-        );
+        throw new Error(result.message || "Booking failed!");
       }
 
       // Success Toast
-      toast.success("Studio booked successfully!");
+      toast.success("Studio booked successfully! Pending host confirmation.");
+      setIsModalOpen(false); // Close Modal
 
       // Redirect to Explore after 1 second
       setTimeout(() => {
@@ -185,25 +201,108 @@ const BookingCard = ({ exploreData }: BookingCardProps) => {
           </div>
         )}
 
-        {/* Booking Button */}
-        <form onSubmit={handleBooking} className="mt-4">
+        {/* Initial Trigger Button */}
+        <div className="mt-4">
           <Button
-            type="submit"
-            disabled={loading || isPending}
-            className="mt-4 w-full rounded-2xl bg-brand p-2 text-white hover:bg-brand-dark"
+            type="button"
+            onClick={handleOpenModal}
+            disabled={isPending}
+            className="mt-4 w-full rounded-2xl bg-brand p-2 text-white hover:bg-brand-dark cursor-pointer"
           >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Booking...
-              </>
-            ) : (
-              "Book This Studio"
-            )}
+            Book This Studio
           </Button>
-        </form>
+        </div>
 
       </div>
+
+      {/* Date & Time Selection Modal / Popup */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl border border-border">
+            
+            <h3 className="text-xl font-bold text-foreground mb-1">
+              Request a Reservation
+            </h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              {exploreData.title} • ৳{exploreData.hourlyRate} per hour • Pending host confirmation
+            </p>
+
+            <form onSubmit={handleBookingSubmit} className="space-y-4">
+              {/* Booking Date */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-foreground mb-1">
+                  Booking Date
+                </label>
+                <input
+                  type="date"
+                  value={bookingDate}
+                  onChange={(e) => setBookingDate(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand"
+                  required
+                />
+              </div>
+
+              {/* Start and End Time */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-foreground mb-1">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-foreground mb-1">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand"
+                    required
+                  />
+                </div>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground pt-1">
+                Your booking is pending until the host confirms availability.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="rounded-xl border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-muted cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="rounded-xl bg-brand px-5 py-2 text-xs font-medium text-white hover:bg-brand-dark disabled:opacity-50 cursor-pointer"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Request booking"
+                  )}
+                </Button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };

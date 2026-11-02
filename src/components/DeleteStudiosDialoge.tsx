@@ -15,16 +15,24 @@ import {
 
 import { toast } from "react-toastify";
 import { Button } from "./ui/button";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 const DeleteStudiosDialoge = ({ id }: { id: string }) => {
   const router = useRouter();
 
   const handleDeleteStudios = async () => {
   try {
+
+const token = await getTokenFromClient();
+
+
     const res = await fetch(
       `http://localhost:8000/exploreStudios/${id}`,
       {
         method: "DELETE",
+        headers:{
+          authorization: `Bearer ${token}`,
+        }
       }
     );
 

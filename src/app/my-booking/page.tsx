@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import BookingCard from "@/components/my-bookings/booking-card";
+import { getTokenFromServer } from "@/lib/getTokenFromServer";
 
 interface ImageObject {
   filename?: string;
@@ -36,10 +37,18 @@ const MyBookingPage = async () => {
     return <div>Please login first.</div>;
   }
 
+  // 1. Token ta ekhane fetch kora hocche
+  const token = await getTokenFromServer();
+
+  // 2. Fetch request-e Authorization header-er maddhome token ta pathano hocche
   const res = await fetch(
     `http://localhost:8000/my-bookings/${encodeURIComponent(user.email)}`,
     {
       cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     }
   );
 
@@ -51,7 +60,6 @@ const MyBookingPage = async () => {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12">
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900">
           My Bookings
@@ -86,7 +94,6 @@ const MyBookingPage = async () => {
           ))}
         </div>
       )}
-
     </section>
   );
 };

@@ -1,9 +1,8 @@
-
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 
 import {
@@ -11,8 +10,6 @@ import {
   Menu,
   X,
   User,
-  Moon,
-  Sun,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,25 +43,31 @@ export function SiteHeader() {
 
   const user = session?.user;
   const pathname = usePathname();
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
-
   const { theme } = useTheme();
+
+  // Safe check for dark theme without triggering cascading render warning
   const isDark = theme === "dark";
 
+  // Sign Out
   const handleSignOut = async () => {
     await authClient.signOut();
     setOpen(false);
+    router.replace("/login");
+    router.refresh();
   };
 
   return (
     <header
+      suppressHydrationWarning
       className={cn(
         "sticky top-0 z-50 text-white shadow-md transition-colors duration-300",
         isDark ? "bg-[#111827]" : "bg-navy"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-350 items-center justify-between gap-4 px-4 sm:px-6">
 
         {/* Logo */}
         <Link
@@ -109,7 +112,6 @@ export function SiteHeader() {
         {/* Desktop Actions */}
         <div className="hidden items-center gap-3 md:flex">
 
-          {/* Theme Toggle */}
           <ThemeToggle />
 
           {!isPending &&
@@ -309,3 +311,5 @@ export function SiteHeader() {
     </header>
   );
 }
+
+export default SiteHeader;

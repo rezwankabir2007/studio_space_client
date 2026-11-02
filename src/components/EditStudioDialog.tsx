@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { getTokenFromClient } from "@/lib/getTokenFromClient";
 
 // Studio data type
 type StudioRecord = {
@@ -163,12 +164,17 @@ export default function EditStudioDialog({
           }),
       };
 
+      // 1. Client side theke token ana hocche
+      const token = await getTokenFromClient();
+
+      // 2. Fetch request-e Authorization header add kora holo
       const res = await fetch(
         `http://localhost:8000/exploreStudios/${exploreData._id}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(updatedData),
         }
