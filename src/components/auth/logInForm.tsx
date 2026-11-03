@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -17,11 +18,15 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Email Login & Register
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
+
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
@@ -43,7 +48,9 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
       }
 
       if (result.error) {
-        toast.error(result.error.message || "Authentication failed!");
+        toast.error(
+          result.error.message || "Authentication failed!"
+        );
         setLoading(false);
         return;
       }
@@ -65,12 +72,13 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
     }
   };
 
-  // Google Social Sign In Handler
+  // Google Social Sign In
   const handleGoogleSignIn = async () => {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: `${window.location.origin}/`,
+        errorCallbackURL: `${window.location.origin}/login`,
       });
     } catch (error) {
       console.error("Google Auth Error:", error);
@@ -80,11 +88,16 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+
       {mode === "register" && (
         <div className="space-y-1.5">
-          <label htmlFor="name" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="name"
+            className="text-sm font-medium text-foreground"
+          >
             Full Name
           </label>
+
           <Input
             id="name"
             name="name"
@@ -96,9 +109,13 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
       )}
 
       <div className="space-y-1.5">
-        <label htmlFor="email" className="text-sm font-medium text-foreground">
+        <label
+          htmlFor="email"
+          className="text-sm font-medium text-foreground"
+        >
           Email
         </label>
+
         <Input
           id="email"
           name="email"
@@ -110,9 +127,13 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="password" className="text-sm font-medium text-foreground">
+        <label
+          htmlFor="password"
+          className="text-sm font-medium text-foreground"
+        >
           Password
         </label>
+
         <Input
           id="password"
           name="password"
@@ -120,7 +141,11 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
           required
           minLength={8}
           placeholder="••••••••"
-          autoComplete={mode === "login" ? "current-password" : "new-password"}
+          autoComplete={
+            mode === "login"
+              ? "current-password"
+              : "new-password"
+          }
         />
       </div>
 
@@ -141,12 +166,15 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border" />
         </div>
+
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">অথবা</span>
+          <span className="bg-background px-2 text-muted-foreground">
+            অথবা
+          </span>
         </div>
       </div>
 
-      {/* Continue with Google Button */}
+      {/* Continue with Google */}
       <Button
         type="button"
         variant="outline"
@@ -171,6 +199,7 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
             d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.15 2.68 1.18 6.61l4.09 3.15c.95-2.85 3.6-4.96 6.73-4.96z"
           />
         </svg>
+
         <span>Continue with Google</span>
       </Button>
 
@@ -178,19 +207,26 @@ export function AuthForm({ mode = "login" }: AuthFormProps) {
         {mode === "login" ? (
           <>
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-medium text-brand hover:underline">
+            <Link
+              href="/register"
+              className="font-medium text-brand hover:underline"
+            >
               Register
             </Link>
           </>
         ) : (
           <>
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-brand hover:underline">
+            <Link
+              href="/login"
+              className="font-medium text-brand hover:underline"
+            >
               Login
             </Link>
           </>
         )}
       </p>
+
     </form>
   );
 }
