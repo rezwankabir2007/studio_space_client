@@ -6,9 +6,9 @@
 Studio owners can list their studios, manage reservations, and connect with creators through a simple and user-friendly platform.
 
 
- 2.Live Website : https://studiospacefontend.vercel.app/
+ 2.Live Links : 
 
-i.Live Website: https://your-live-website-url.vercel.app
+i.Live Website: https://studiospacefontend.vercel.app/
 
 ii.Github Client Repository: https://github.com/rezwankabir2007/studio_space_client
 
