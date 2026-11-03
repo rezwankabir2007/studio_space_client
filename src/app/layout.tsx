@@ -40,6 +40,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
 
           <Toaster richColors position="top-right" />
+          
 
           <SiteFooter />
         </ThemeProvider>

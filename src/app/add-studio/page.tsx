@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft, ChevronDown, CloudUpload, Image as ImageIcon,
   LayoutGrid, MapPin, PlusCircle, ShieldCheck,
@@ -10,6 +11,7 @@ import {
 import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
 import { getTokenFromClient } from "@/lib/getTokenFromClient";
+import { toast } from "sonner";
 
 const CATEGORIES = [
   "Photo Studio", "Sound Stage", "Podcast Room",
@@ -29,8 +31,9 @@ type ImageItem = {
   url: string;
 };
 
+// টেক্সট লেখার সময় যেন ক্লিয়ার দেখা যায় সেজন্য টেক্সট কালার explicitly ডার্ক করা হয়েছে
 const inputClass =
-  "w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
+  "w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
 
 const Label = ({
   children,
@@ -78,6 +81,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 const AddStudio = () => {
+  const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const urlsRef = useRef<string[]>([]);
 
@@ -96,11 +100,6 @@ const AddStudio = () => {
   const [amenities, setAmenities] = useState<string[]>(["WiFi"]);
   const [images, setImages] = useState<ImageItem[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const [message, setMessage] = useState({
-    success: "",
-    error: "",
-  });
 
   useEffect(() => {
     return () => {
@@ -132,38 +131,26 @@ const AddStudio = () => {
     if (!files || !files.length) return;
 
     if (images.length >= 1) {
-      setMessage({
-        success: "",
-        error: "Please remove the current image before adding another.",
-      });
+      toast.error("Please remove the current image before adding another.");
       return;
     }
 
     const selected = Array.from(files);
 
     if (selected.length > 1) {
-      setMessage({
-        success: "",
-        error: "Only one image is allowed.",
-      });
+      toast.error("Only one image is allowed.");
       return;
     }
 
     const file = selected[0];
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setMessage({
-        success: "",
-        error: "Only JPG, PNG and WEBP images are allowed.",
-      });
+      toast.error("Only JPG, PNG and WEBP images are allowed.");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setMessage({
-        success: "",
-        error: "Image size must be under 5MB.",
-      });
+      toast.error("Image size must be under 5MB.");
       return;
     }
 
@@ -177,8 +164,6 @@ const AddStudio = () => {
         url,
       },
     ]);
-
-    setMessage({ success: "", error: "" });
   };
 
   const removeImage = (id: string) => {
@@ -224,13 +209,8 @@ const AddStudio = () => {
   ) => {
     e.preventDefault();
 
-    setMessage({ success: "", error: "" });
-
     if (!images.length) {
-      setMessage({
-        success: "",
-        error: "Please upload one studio image.",
-      });
+      toast.error("Please upload one studio image.");
       return;
     }
 
@@ -252,9 +232,7 @@ const AddStudio = () => {
         ],
       };
 
-      
-const token = await getTokenFromClient();
-
+      const token = await getTokenFromClient();
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add_studio`, {
         method: "POST",
@@ -271,20 +249,20 @@ const token = await getTokenFromClient();
         throw new Error(data.message || "Failed to add studio.");
       }
 
+      toast.success(data.message || "Studio added successfully!");
       resetForm();
 
-      setMessage({
-        success: data.message || "Studio added successfully!",
-        error: "",
-      });
+      // স্টুডিও সফলভাবে অ্যাড হওয়ার পর সরাসরি my-booking পেজে রিডাইরেক্ট করবে
+      setTimeout(() => {
+        window.location.href = "/my-booking";
+      }, 1000);
+
     } catch (err) {
-      setMessage({
-        success: "",
-        error:
-          err instanceof Error
-            ? err.message
-            : "Something went wrong.",
-      });
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong."
+      );
     } finally {
       setLoading(false);
     }
@@ -313,18 +291,6 @@ const token = await getTokenFromClient();
           </p>
         </div>
       </div>
-
-      {message.success && (
-        <p className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-700">
-          {message.success}
-        </p>
-      )}
-
-      {message.error && (
-        <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
-          {message.error}
-        </p>
-      )}
 
       <form
         onSubmit={handleSubmit}
@@ -359,7 +325,7 @@ const token = await getTokenFromClient();
                   value={form.category}
                   onChange={handleChange}
                   required
-                  className={`${inputClass} appearance-none pr-9`}
+                  className={`${inputClass} appearance-none pr-9 text-slate-900`}
                 >
                   <option value="" disabled>Select category</option>
                   {CATEGORIES.map((c) => (
@@ -543,7 +509,7 @@ const token = await getTokenFromClient();
               maxLength={MAX_DESC}
               rows={6}
               placeholder="e.g. Spacious studio with professional lighting equipment..."
-              className={`${inputClass} resize-y`}
+              className={`${inputClass} resize-y text-slate-900`}
             />
 
             <p className="mt-2 text-right text-xs text-slate-500">
@@ -599,7 +565,6 @@ const token = await getTokenFromClient();
               type="button"
               onClick={() => {
                 resetForm();
-                setMessage({ success: "", error: "" });
               }}
               disabled={loading}
               className="flex-1 rounded-md border border-blue-600 bg-white px-4 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:opacity-50"
@@ -610,7 +575,7 @@ const token = await getTokenFromClient();
             <button
               type="submit"
               disabled={loading}
-              className="flex flex-[1.6] items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+              className="flex flex-[1.6] items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
             >
               {loading ? (
                 "Adding..."

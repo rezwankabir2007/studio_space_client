@@ -9,7 +9,11 @@ import {
   Aperture,
   Menu,
   X,
-  User,
+  LayoutDashboard,
+  PlusCircle,
+  ListOrdered,
+  CalendarCheck,
+  LogOut,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -32,8 +36,8 @@ import ThemeToggle from "@/components/theme-toggle";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Explore Studios", href: "/explore" },
-  { label: "My Bookings", href: "/my-booking" },
-  { label: "Add Studio", href: "/add-studio" },
+  // { label: "My Bookings", href: "/my-booking" },
+  // { label: "Add Studio", href: "/add-studio" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "About Us", href: "/about" },
 ] as const;
@@ -46,6 +50,7 @@ export function SiteHeader() {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const { theme } = useTheme();
 
   // Safe check for dark theme without triggering cascading render warning
@@ -54,6 +59,7 @@ export function SiteHeader() {
   // Sign Out
   const handleSignOut = async () => {
     await authClient.signOut();
+    setPopoverOpen(false);
     setOpen(false);
     router.replace("/login");
     router.refresh();
@@ -63,13 +69,15 @@ export function SiteHeader() {
     <header
       suppressHydrationWarning
       className={cn(
-        "sticky top-0 z-50 text-white shadow-md transition-colors duration-300",
+        "sticky top-0 z-50 w-full text-white shadow-md transition-colors duration-300",
         isDark ? "bg-[#111827]" : "bg-navy"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-350 items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
 
         {/* Logo */}
+
+        
         <Link
           href="/"
           className="flex items-center gap-2.5"
@@ -99,7 +107,7 @@ export function SiteHeader() {
                 className={cn(
                   "border-b-2 pt-1 text-sm transition-colors",
                   active
-                    ? "border-brand font-medium text-blue-400"
+                    ? "border-blue-400 font-medium text-blue-400"
                     : "border-transparent text-white/80 hover:text-white"
                 )}
               >
@@ -116,36 +124,66 @@ export function SiteHeader() {
 
           {!isPending &&
             (user ? (
-              <Popover>
-                <PopoverTrigger className="rounded-full focus:outline-none focus:ring-2 focus:ring-white/50">
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger className="rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer">
                   <Avatar>
                     <AvatarImage
                       referrerPolicy="no-referrer"
                       src={user.image || undefined}
                     />
 
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-blue-600 text-white font-bold">
                       {user.name?.charAt(0) || "U"}
                     </AvatarFallback>
                   </Avatar>
                 </PopoverTrigger>
 
-                <PopoverContent className="w-56 text-foreground">
-                  <PopoverHeader className="text-left">
-                    <PopoverTitle>{user.name}</PopoverTitle>
+                <PopoverContent className="w-60 text-foreground" align="end">
+                  <PopoverHeader className="text-left pb-2">
+                    <PopoverTitle className="font-semibold text-sm">{user.name}</PopoverTitle>
 
                     <PopoverDescription className="truncate text-xs text-muted-foreground">
                       {user.email}
                     </PopoverDescription>
                   </PopoverHeader>
 
-                  <div className="mt-3 flex flex-col gap-1">
+                  <Separator className="my-1" />
+
+                  <div className="flex flex-col gap-1 pt-1">
                     <Link
-                      href="/myprofile"
-                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
+                      href="/dashboard"
+                      onClick={() => setPopoverOpen(false)}
+                      className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-muted"
                     >
-                      <User className="size-4" />
-                      Profile
+                      <LayoutDashboard className="size-4 text-blue-500" />
+                      Dashboard
+                    </Link>
+
+                    <Link
+                      href="/add-studio"
+                      onClick={() => setPopoverOpen(false)}
+                      className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                    >
+                      <PlusCircle className="size-4 text-green-500" />
+                      Add New Studio
+                    </Link>
+
+                    <Link
+                      href="/my-studios"
+                      onClick={() => setPopoverOpen(false)}
+                      className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                    >
+                      <ListOrdered className="size-4 text-purple-500" />
+                      My Studio Listings
+                    </Link>
+
+                    <Link
+                      href="/my-booking"
+                      onClick={() => setPopoverOpen(false)}
+                      className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                    >
+                      <CalendarCheck className="size-4 text-amber-500" />
+                      My Bookings
                     </Link>
 
                     <Separator className="my-1" />
@@ -153,9 +191,10 @@ export function SiteHeader() {
                     <Button
                       onClick={handleSignOut}
                       variant="destructive"
-                      className="h-8 w-full justify-start text-xs"
+                      className="h-9 w-full justify-start gap-2 text-xs font-semibold cursor-pointer"
                     >
-                      Signout
+                      <LogOut className="size-4" />
+                      Logout
                     </Button>
                   </div>
                 </PopoverContent>
@@ -192,7 +231,7 @@ export function SiteHeader() {
 
           <button
             type="button"
-            className="flex size-9 items-center justify-center rounded-md border border-white/25"
+            className="flex size-9 items-center justify-center rounded-md border border-white/25 cursor-pointer"
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((value) => !value)}
@@ -209,7 +248,7 @@ export function SiteHeader() {
       {/* Mobile Navigation */}
       {open && (
         <nav
-          className="border-t border-white/10 px-4 pb-4 md:hidden"
+          className="border-t border-white/10 px-4 pb-4 md:hidden bg-[#111827]"
           aria-label="Mobile"
         >
           <ul className="flex flex-col gap-1 py-2">
@@ -235,8 +274,10 @@ export function SiteHeader() {
             })}
           </ul>
 
+          <Separator className="my-2 bg-white/10" />
+
           {/* Mobile User Actions */}
-          <div className="flex gap-3 px-3 pt-1">
+          <div className="flex flex-col gap-2 px-3 pt-1">
             {!isPending &&
               (user ? (
                 <div className="flex w-full flex-col gap-2">
@@ -247,7 +288,7 @@ export function SiteHeader() {
                         src={user.image || undefined}
                       />
 
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-blue-600 text-white font-bold">
                         {user.name?.charAt(0) || "U"}
                       </AvatarFallback>
                     </Avatar>
@@ -264,24 +305,52 @@ export function SiteHeader() {
                   </div>
 
                   <Link
-                    href="/myprofile"
+                    href="/dashboard"
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20"
                   >
-                    <User className="size-4" />
-                    Profile
+                    <LayoutDashboard className="size-4 text-blue-400" />
+                    Dashboard
+                  </Link>
+
+                  <Link
+                    href="/add-studio"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20"
+                  >
+                    <PlusCircle className="size-4 text-green-400" />
+                    Add New Studio
+                  </Link>
+
+                  <Link
+                    href="/my-studios"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20"
+                  >
+                    <ListOrdered className="size-4 text-purple-400" />
+                    My Studio Listings
+                  </Link>
+
+                  <Link
+                    href="/my-booking"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/20"
+                  >
+                    <CalendarCheck className="size-4 text-amber-400" />
+                    My Bookings
                   </Link>
 
                   <Button
                     onClick={handleSignOut}
                     variant="destructive"
-                    className="w-full"
+                    className="w-full mt-2 gap-2 cursor-pointer"
                   >
-                    Signout
+                    <LogOut className="size-4" />
+                    Logout
                   </Button>
                 </div>
               ) : (
-                <div className="flex w-full gap-3">
+                <div className="flex w-full gap-3 pt-2">
                   <Link
                     href="/login"
                     onClick={() => setOpen(false)}

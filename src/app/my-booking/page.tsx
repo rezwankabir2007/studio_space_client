@@ -42,15 +42,7 @@ const MyBookingPage = async () => {
   const token = await getTokenFromServer();
 
 
-  // const jwtToken = await auth.api.getToken({
-  //   headers: await headers(),
-  // })
-
-  // const token = jwtToken?.token
-  // console.log("JWT Token:", token);
-
-
-  // 2. Fetch request-e Authorization header-er maddhome token ta pathano hocche
+ 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/my-bookings/${encodeURIComponent(user.email)}`,
     {
